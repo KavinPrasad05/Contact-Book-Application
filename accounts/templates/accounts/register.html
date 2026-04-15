@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+
+    <div class="card shadow mt-5">
+      <div class="card-header bg-success text-white text-center py-3">
+        <h4 class="mb-0">
+          <i class="bi bi-person-plus"></i> Create Account
+        </h4>
+      </div>
+
+      <div class="card-body p-4">
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" id="registerForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Email Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Email <span class="text-danger">*</span>
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+            {% endif %}
+            <div class="text-danger small mt-1 d-none" id="emailError"></div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Password <span class="text-danger">*</span>
+            </label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+              <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
+            {% endif %}
+            <div class="text-danger small mt-1 d-none" id="passwordError"></div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Confirm Password <span class="text-danger">*</span>
+            </label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+              <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
+            {% endif %}
+            <div class="text-danger small mt-1 d-none" id="confirmError"></div>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-person-check"></i> Register
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="card-footer text-center py-3">
+        Already have an account?
+        <a href="{% url 'login' %}">Login here</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

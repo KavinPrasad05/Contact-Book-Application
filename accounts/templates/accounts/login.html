@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow mt-5">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4 class="mb-0">
+          <i class="bi bi-box-arrow-in-right"></i> Login
+        </h4>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" id="loginForm" novalidate>
+          {% csrf_token %}
+          <!-- Email Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Email <span class="text-danger">*</span>
+            </label>
+            {{ form.username }}
+            <!-- Server side error: email not registered -->
+            {% if form.username.errors %}
+              <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+            {% endif %}
+            <!-- Frontend empty field error -->
+            <div class="text-danger small mt-1 d-none" id="emailError"></div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              Password <span class="text-danger">*</span>
+            </label>
+            {{ form.password }}
+            <!-- Server side error: wrong password -->
+            <div class="text-danger small mt-1"
+                id="passwordError"
+              {% if not form.password.errors %}d-none{% endif %}>
+              {% if form.password.errors %}
+              {{ form.password.errors.0 }} 
+              {% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="card-footer text-center py-3">
+        Don't have an account?
+        <a href="{% url 'register' %}">Register here</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if request.GET.registered %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    Swal.fire({
+      icon:               'success',
+      title:              'Account Created!',
+      text:               'Your account was created successfully. Please log in.',
+      timer:              2000,
+      timerProgressBar:   false,
+    });
+  });
+</script>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  const form          = document.getElementById('loginForm');
+  const emailInput    = document.getElementById('id_username');
+  const passwordInput = document.getElementById('id_password');
+  const emailError    = document.getElementById('emailError');
+  const passwordError = document.getElementById('passwordError');
+
+  //  Helper: show error 
+  function showError(errorDiv, input, message) {
+    errorDiv.textContent = message;      
+    errorDiv.classList.remove('d-none'); 
+    input.classList.add('is-invalid'); 
+  }
+
+  //  Helper: clear error 
+  function clearError(errorDiv, input) {
+    errorDiv.textContent = '';            
+    errorDiv.classList.add('d-none');    
+    input.classList.remove('is-invalid'); 
+  }
+
+  //  Clear errors as user types
+  emailInput.addEventListener('input', function () {
+    clearError(emailError, emailInput);
+  });
+
+  passwordInput.addEventListener('input', function () {
+    clearError(passwordError, passwordInput);
+  });
+
+  // On submit: empty field check only
+  form.addEventListener('submit', function (e) {
+    let isValid = true;
+
+    // Check email is not empty
+    if (emailInput.value.trim() === '') {
+      showError(emailError, emailInput, 'Email is required.');
+      isValid = false;
+    }
+
+    // Check password is not empty
+    if (passwordInput.value.trim() === '') {
+      showError(passwordError, passwordInput, 'Password is required.');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      e.preventDefault(); // stop form submitting to server
+    }
+  });
+
+});
+</script>
+
+{% endblock %}
