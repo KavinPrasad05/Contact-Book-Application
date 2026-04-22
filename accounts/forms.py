@@ -45,3 +45,26 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Enter your password',
         })
     )
+class OTPVerificationForm(forms.Form):
+    """Step 2 of 2FA — collect the 6-digit OTP sent to the user's email."""
+    otp_code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={
+            'class':        'form-control text-center',
+            'placeholder':  'Enter 6-digit OTP',
+            'autofocus':    True,
+            'inputmode':    'numeric',
+            'pattern':      '[0-9]{6}',
+            'autocomplete': 'one-time-code',
+        }),
+        label='OTP Code',
+    )
+
+    def clean_otp_code(self):
+        otp = self.cleaned_data.get('otp_code', '').strip()
+        if not otp.isdigit():
+            raise forms.ValidationError('OTP must contain digits only.')
+        if len(otp) != 6:
+            raise forms.ValidationError('OTP must be exactly 6 digits.')
+        return otp

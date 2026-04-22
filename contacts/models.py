@@ -12,13 +12,15 @@ class ContactGroup(models.Model):
 class Contact(models.Model):
     name = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(unique=True, blank=True, null=True)
-    contact_picture = models.ImageField(upload_to='contacts/')
+    email = models.EmailField(blank=True, null=True)
+    contact_picture = models.ImageField(upload_to='contacts/',null=True,blank=True,)
     contact_group = models.ForeignKey(
                         ContactGroup, 
                         max_length=50,
                         related_name='contacts',
                         on_delete=models.CASCADE,
+                        null=True,
+                        blank=True,
                     )
     
     def save(self, *args, **kwargs):

@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
+    'django_celery_results',
     'storages',
     'accounts',
     'contacts',
@@ -50,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.IdleTimeoutMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -111,11 +114,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
 
-USE_TZ = True
+SESSION_COOKIE_AGE = 600
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGIN_URL = '/accounts/login/'
@@ -129,3 +132,43 @@ STATIC_URL = 'static/'
 MEDIA_URL   = '/media/'
 MEDIA_ROOT  = BASE_DIR / 'media'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+#  Celery + Redis 
+CELERY_BROKER_URL      = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND  = 'django-db'
+CELERY_ACCEPT_CONTENT  = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ENABLE_UTC      = False
+
+#  Time 
+TIME_ZONE      = 'Asia/Kolkata'
+USE_TZ         = True
+CELERY_TIMEZONE = 'Asia/Kolkata'
+
+#  Celery Beat Scheduler 
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'good-morning-every-2-minutes': {
+        'task':     'contacts.tasks.send_good_morning_message',
+        #'schedule': crontab(minute='*/2'),   # every 2 minutes for testing
+        'schedule': crontab(hour=10, minute=0),  # daily at 10 AM (production)
+    },
+}
+
+
+# Mailtrap SMTP
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'sandbox.smtp.mailtrap.io'   # Mailtrap SMTP host
+EMAIL_PORT          = 2525                          # Mailtrap SMTP port
+EMAIL_USE_TLS       = True
+EMAIL_USE_SSL       = False
+EMAIL_HOST_USER = 'd4743411081d94'
+EMAIL_HOST_PASSWORD = '3a1590f354e94c'
+DEFAULT_FROM_EMAIL = 'Contact Book <noreply@contactbook.local>'
+
+# # OTP Settings 
+# OTP_EXPIRY_MINUTES = 5    # OTP expires after 5 minutes
+# OTP_LENGTH         = 6    # 6-digit OTP

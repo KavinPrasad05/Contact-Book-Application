@@ -139,3 +139,22 @@ class CustomUserModelTest(TestCase):
     def test_baker_can_create_multiple_users(self):
         users = baker.make(User, _quantity=5)
         self.assertEqual(len(users), 5)
+
+    def test_generate_otp(self):
+        user = User.objects.create_user(email='otp@example.com', password='Test@123')
+        otp = user.generate_otp()
+        self.assertEqual(len(otp), 6)
+        self.assertEqual(user.otp_code, otp)
+
+    def test_is_otp_valid(self):
+        user = User.objects.create_user(email='otp2@example.com', password='Test@123')
+        otp = user.generate_otp()
+        self.assertTrue(user.is_otp_valid(otp))
+        self.assertFalse(user.is_otp_valid('000000'))
+
+    def test_clear_otp(self):
+        user = User.objects.create_user(email='otp3@example.com', password='Test@123')
+        user.generate_otp()
+        user.clear_otp()
+        self.assertIsNone(user.otp_code)
+        self.assertTrue(user.is_otp_verified)
